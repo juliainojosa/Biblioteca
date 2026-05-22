@@ -4,127 +4,83 @@ package com.biblioteca.entity;
  * Importações do JPA.
  * JPA = tecnologia usada para mapear objetos Java em tabelas do banco.
  */
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 
-/*
- * @Entity
- *
- * Diz ao Spring:
- *
- * "essa classe representa uma tabela do banco de dados"
- *
- * Cada objeto Livro será uma linha da tabela.
- */
-@Entity
+@Entity //Marca a classe como uma entidade do JPA, ou seja, uma tabela do banco.
 public class Livro {
 
-    /*
-     * @Id
-     *
-     * Define a chave primária da tabela.
-     *
-     * Toda tabela precisa de um identificador único.
-     */
-    @Id
+    @Id //PK
 
-    /*
-     * @GeneratedValue
-     *
-     * Faz o ID ser gerado automaticamente.
-     *
-     * GenerationType.IDENTITY:
-     * o próprio banco cria os IDs.
-     */
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY) //Auto-incremento do ID no banco.
 
-    /*
-     * Atributos da entidade.
-     *
-     * Cada atributo vira uma coluna no banco.
-     */
+    //Atributos
+    private Long idLivro;//JPA já entende que isso é uma tabela primária por conta do @Id.
+
+    //Constraints São regras que definem como os dados devem ser armazenados no banco. Ex: @Column e @NotBlank.
+
+    @Column(nullable = false, length = 150)
     private String titulo;
 
-    private String autor;
-
+    @Column(nullable = false, unique = true)
     private String isbn;
 
-    private String categoria;
+    @ManyToOne
+    @JoinColumn(name = "autor_id")//FK para a tabela Autor dentro da tabela Livro.
+    private Autor autor;
 
-    /*
-     * Getter do ID
-     *
-     * Getter = método para obter valor.
-     */
-    public Long getId() {
-        return id;
+    @ManyToOne
+    @JoinColumn(name = "categoria_id")
+    private Categoria categoria;
+
+//Getters e Setters
+    public Long getIdLivro() {
+        return idLivro;
     }
 
-    /*
-     * Setter do ID
-     *
-     * Setter = método para alterar valor.
-     */
-    public void setId(Long id) {
-        this.id = id;
+    public void setIdLivro(Long idLivro) {
+        this.idLivro = idLivro;
     }
 
-    /*
-     * Getter do título
-     */
     public String getTitulo() {
         return titulo;
     }
 
-    /*
-     * Setter do título
-     */
     public void setTitulo(String titulo) {
         this.titulo = titulo;
     }
 
-    /*
-     * Getter do autor
-     */
-    public String getAutor() {
+    public Autor getAutor() {
         return autor;
     }
 
-    /*
-     * Setter do autor
-     */
-    public void setAutor(String autor) {
+    public void setAutor(Autor autor) {
         this.autor = autor;
     }
 
-    /*
-     * Getter do ISBN
-     */
     public String getIsbn() {
         return isbn;
     }
 
-    /*
-     * Setter do ISBN
-     */
     public void setIsbn(String isbn) {
         this.isbn = isbn;
     }
 
-    /*
-     * Getter da categoria
-     */
-    public String getCategoria() {
+    public Categoria getCategoria() {
         return categoria;
     }
 
-    /*
-     * Setter da categoria
-     */
-    public void setCategoria(String categoria) {
+    public void setCategoria(Categoria categoria) {
         this.categoria = categoria;
     }
 }
+
+
