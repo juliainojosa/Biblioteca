@@ -5,8 +5,6 @@ package com.biblioteca.entity;
  * JPA = tecnologia usada para mapear objetos Java em tabelas do banco.
  */
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;

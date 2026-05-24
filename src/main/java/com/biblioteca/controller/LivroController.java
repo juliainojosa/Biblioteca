@@ -1,10 +1,15 @@
 package com.biblioteca.controller;
 
+// Importa List
 import java.util.List;
-import java.util.Optional;
 
+// Faz injeção automática de dependência
 import org.springframework.beans.factory.annotation.Autowired;
+
+// Classe usada para retornar respostas HTTP
 import org.springframework.http.ResponseEntity;
+
+// Importações das anotações REST
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -15,93 +20,107 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+// Importa entidade Livro
 import com.biblioteca.entity.Livro;
-import com.biblioteca.repository.LivroRepository;
 
-@RestController//Anotação que indica que esta classe é um controlador REST, ou seja, ela lida com requisições HTTP e retorna respostas em formato JSON ou XML.
+// Importa o service
+import com.biblioteca.service.LivroService;
 
-@RequestMapping("/livros")//Anotação que define o caminho base para as rotas deste controlador. Todas as rotas definidas nesta classe terão o prefixo "/livros". Por exemplo, uma rota definida como @GetMapping("/todos") seria acessível através do caminho "/livros/todos".
+@RestController
+// Define que esta classe é um Controller REST
+// Ela responde requisições HTTP em JSON
 
+@RequestMapping("/livros")
+// Caminho base da API
+// Tudo aqui começa com /livros
 public class LivroController {
 
-    @Autowired// Spring deve injetar automaticamente uma instância do LivroRepository nesta classe. Isso permite que o controlador acesse os métodos do repositório para realizar operações de banco de dados relacionadas à entidade "Livro".
+    @Autowired
+    // Injeta automaticamente o LivroService
+    private LivroService livroService;
 
-    private LivroRepository livroRepository;
-
+    // =====================================================
     // LISTAR TODOS OS LIVROS
-    @GetMapping//Anotação que indica que este método deve ser executado quando uma requisição HTTP GET for feita para o caminho "/livros". Isso significa que, quando um cliente fizer uma requisição GET para "/livros", este método será chamado para processar a solicitação e retornar a resposta apropriada.
-    public Iterable<Livro>
-    
-     listarLivros() {
-        return livroRepository.findAll();
-    }
-    
+    // =====================================================
 
+    @GetMapping
+    // GET http://localhost:8080/livros
+    public List<Livro> listarLivros() {
+
+        // Chama o service
+        return livroService.listarLivros();
+    }
+
+    // =====================================================
     // BUSCAR LIVRO POR ID
+    // =====================================================
+
     @GetMapping("/{id}")
+    // Exemplo:
+    // GET http://localhost:8080/livros/1
     public ResponseEntity<Livro> buscarPorId(@PathVariable Long id) {
 
-        Optional<Livro> livro = livroRepository.findById(id);
+        // @PathVariable pega o ID da URL
 
-        if (livro.isPresent()) {
-            return ResponseEntity.ok(livro.get());
-        }
+        Livro livro = livroService.buscarPorId(id);
 
-        return ResponseEntity.notFound().build();
+        // Retorna 200 OK
+        return ResponseEntity.ok(livro);
     }
-    
+
+    // =====================================================
     // CADASTRAR LIVRO
-    @PostMapping
-    public Livro cadastrarLivro(@RequestBody Livro livro) {
-        return livroRepository.save(livro);
+    // =====================================================
 
-        
+    @PostMapping
+    // POST http://localhost:8080/livros
+    public Livro cadastrarLivro(@RequestBody Livro livro) {
+
+        // @RequestBody pega o JSON enviado
+
+        return livroService.cadastrarLivro(livro);
     }
+
+    // =====================================================
+    // BUSCAR LIVRO POR TÍTULO
+    // =====================================================
 
     @GetMapping("/buscar")
-public List<Livro> buscarPorTitulo(@RequestParam String titulo) {
+    // Exemplo:
+    // GET /livros/buscar?titulo=Java
+    public List<Livro> buscarPorTitulo(@RequestParam String titulo) {
 
-    return livroRepository.findByTituloContaining(titulo); //O método findByTituloContaining é um método de consulta personalizada que você deve definir no seu LivroRepository. Ele busca livros cujo título contenha a string fornecida como parâmetro. @RequestParam é usado para extrair o valor do parâmetro "titulo" da URL da requisição. Por exemplo, se um cliente fizer uma requisição GET para "/livros/buscar?titulo=Java", este método será chamado e buscará livros cujo título contenha a palavra "Java".
+        // @RequestParam pega parâmetro da URL
 
-}
-
-@PutMapping("/{id}")
-public ResponseEntity<Livro> atualizarLivro(
-        @PathVariable Long id,
-        @RequestBody Livro livroAtualizado) {
-
-    Optional<Livro> livroExistente = livroRepository.findById(id);
-
-    if (livroExistente.isPresent()) {
-
-        Livro livro = livroExistente.get();
-
-        livro.setTitulo(livroAtualizado.getTitulo());
-        livro.setIsbn(livroAtualizado.getIsbn());
-        livro.setAutor(livroAtualizado.getAutor());
-        livro.setCategoria(livroAtualizado.getCategoria());
-
-        Livro livroSalvo = livroRepository.save(livro);
-
-        return ResponseEntity.ok(livroSalvo);
+        return livroService.buscarPorTitulo(titulo);
     }
 
-    return ResponseEntity.notFound().build();
-}
+    // =====================================================
+    // ATUALIZAR LIVRO
+    // =====================================================
 
-@DeleteMapping("/{id}")
-public ResponseEntity<Void> deletarLivro(@PathVariable Long id) {
+    @PutMapping("/{id}")
+    // PUT http://localhost:8080/livros/1
+    public ResponseEntity<Livro> atualizarLivro(
+            @PathVariable Long id,
+            @RequestBody Livro livroAtualizado) {
 
-    Optional<Livro> livro = livroRepository.findById(id);
+        Livro livro = livroService.atualizarLivro(id, livroAtualizado);
 
-    if (livro.isPresent()) {
+        return ResponseEntity.ok(livro);
+    }
 
-        livroRepository.deleteById(id);
+    // =====================================================
+    // DELETAR LIVRO
+    // =====================================================
 
+    @DeleteMapping("/{id}")
+    // DELETE http://localhost:8080/livros/1
+    public ResponseEntity<Void> deletarLivro(@PathVariable Long id) {
+
+        livroService.deletarLivro(id);
+
+        // Retorna HTTP 204
         return ResponseEntity.noContent().build();
     }
-
-    return ResponseEntity.notFound().build();
-}
-    
 }

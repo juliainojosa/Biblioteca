@@ -12,34 +12,40 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.biblioteca.entity.Emprestimo;
-import com.biblioteca.repository.EmprestimoRepository;
+import com.biblioteca.service.EmprestimoService;
 
 @RestController
 @RequestMapping("/emprestimos")
 public class EmprestimoController {
 
     @Autowired
-    private EmprestimoRepository emprestimoRepository;
+    private EmprestimoService emprestimoService;
 
+    // LISTAR TODOS
     @GetMapping
     public Iterable<Emprestimo> listarEmprestimos() {
-        return emprestimoRepository.findAll();
+
+        return emprestimoService.listarEmprestimos();
     }
 
+    // BUSCAR POR ID
     @GetMapping("/{id}")
     public ResponseEntity<Emprestimo> buscarPorId(@PathVariable Long id) {
 
-        Optional<Emprestimo> emprestimo = emprestimoRepository.findById(id);
+        Optional<Emprestimo> emprestimo = emprestimoService.buscarPorId(id);
 
         if (emprestimo.isPresent()) {
+
             return ResponseEntity.ok(emprestimo.get());
         }
 
         return ResponseEntity.notFound().build();
     }
 
+    // CADASTRAR
     @PostMapping
     public Emprestimo cadastrarEmprestimo(@RequestBody Emprestimo emprestimo) {
-        return emprestimoRepository.save(emprestimo);
+
+        return emprestimoService.cadastrarEmprestimo(emprestimo);
     }
 }
