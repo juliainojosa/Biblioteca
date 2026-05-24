@@ -1,23 +1,28 @@
 package com.biblioteca.exception;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-@ControllerAdvice
+@RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(ResourceNotFoundException.class)
-    public ResponseEntity<Map<String, String>> tratarErro404(ResourceNotFoundException ex) {
+    // TRATAR ERROS GENÉRICOS
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<String> tratarErroGenerico(Exception ex) {
 
-        Map<String, String> erro = new HashMap<>();
+        return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body("Erro interno: " + ex.getMessage());
+    }
 
-        erro.put("erro", ex.getMessage());
+    // TRATAR IllegalArgumentException
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<String> tratarIllegalArgument(IllegalArgumentException ex) {
 
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(erro);
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body("Erro: " + ex.getMessage());
     }
 }
