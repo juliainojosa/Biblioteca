@@ -1,8 +1,9 @@
 package com.biblioteca.controller;
 
-import java.util.Optional;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,8 +14,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.biblioteca.entity.Categoria;
+import com.biblioteca.dto.CategoriaRequestDTO;
+import com.biblioteca.dto.CategoriaResponseDTO;
 import com.biblioteca.service.CategoriaService;
+
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/categorias")
@@ -23,63 +27,42 @@ public class CategoriaController {
     @Autowired
     private CategoriaService categoriaService;
 
-    // LISTAR TODAS AS CATEGORIAS
     @GetMapping
-    public Iterable<Categoria> listarCategorias() {
-
+    public List<CategoriaResponseDTO> listarCategorias() {
         return categoriaService.listarCategorias();
     }
 
-    // BUSCAR CATEGORIA POR ID
     @GetMapping("/{id}")
-    public ResponseEntity<Categoria> buscarPorId(@PathVariable Long id) {
-
-        Optional<Categoria> categoria = categoriaService.buscarPorId(id);
-
-        if (categoria.isPresent()) {
-
-            return ResponseEntity.ok(categoria.get());
-        }
-
-        return ResponseEntity.notFound().build();
+    public ResponseEntity<CategoriaResponseDTO> buscarPorId(@PathVariable Long id) {
+        return ResponseEntity.ok(categoriaService.buscarPorId(id));
     }
 
-    // CADASTRAR CATEGORIA
     @PostMapping
-    public Categoria cadastrarCategoria(@RequestBody Categoria categoria) {
+    public ResponseEntity<CategoriaResponseDTO> cadastrarCategoria(
+            @Valid @RequestBody CategoriaRequestDTO dto) {
 
-        return categoriaService.cadastrarCategoria(categoria);
+        CategoriaResponseDTO categoria = categoriaService.cadastrarCategoria(dto);
+
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(categoria);
     }
 
-    // ATUALIZAR CATEGORIA
     @PutMapping("/{id}")
-    public ResponseEntity<Categoria> atualizarCategoria(
+    public ResponseEntity<CategoriaResponseDTO> atualizarCategoria(
             @PathVariable Long id,
-            @RequestBody Categoria categoriaAtualizada) {
+            @Valid @RequestBody CategoriaRequestDTO dto) {
 
-        Categoria categoria = categoriaService.atualizarCategoria(id, categoriaAtualizada);
-
-        if (categoria != null) {
-
-            return ResponseEntity.ok(categoria);
-        }
-
-        return ResponseEntity.notFound().build();
+        return ResponseEntity.ok(
+                categoriaService.atualizarCategoria(id, dto)
+        );
     }
 
-    // DELETAR CATEGORIA
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletarCategoria(@PathVariable Long id) {
 
-        Optional<Categoria> categoria = categoriaService.buscarPorId(id);
+        categoriaService.deletarCategoria(id);
 
-        if (categoria.isPresent()) {
-
-            categoriaService.deletarCategoria(id);
-
-            return ResponseEntity.noContent().build();
-        }
-
-        return ResponseEntity.notFound().build();
+        return ResponseEntity.noContent().build();
     }
 }

@@ -1,9 +1,5 @@
 package com.biblioteca.entity;
 
-/*
- * Importações do JPA.
- * JPA = tecnologia usada para mapear objetos Java em tabelas do banco.
- */
 import java.time.LocalDate;
 
 import jakarta.persistence.Column;
@@ -13,28 +9,31 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-
+import jakarta.validation.constraints.NotNull;
 
 @Entity
 public class Emprestimo {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-
     private Long idEmprestimo;
 
+    @NotNull(message = "Data do empréstimo é obrigatória")
     @Column(nullable = false)
     private LocalDate dataEmprestimo;
-    
+
+    @NotNull(message = "Data de devolução é obrigatória")
     @Column(nullable = false)
     private LocalDate dataDevolucao;
 
     private boolean devolvido;
 
+    @NotNull(message = "Usuário é obrigatório")
     @ManyToOne
     @JoinColumn(name = "usuario_id")
     private Usuario usuario;
 
+    @NotNull(message = "Livro é obrigatório")
     @ManyToOne
     @JoinColumn(name = "livro_id")
     private Livro livro;

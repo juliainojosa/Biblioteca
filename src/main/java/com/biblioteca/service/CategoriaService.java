@@ -1,11 +1,14 @@
 package com.biblioteca.service;
 
-import java.util.Optional;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.biblioteca.dto.CategoriaRequestDTO;
+import com.biblioteca.dto.CategoriaResponseDTO;
 import com.biblioteca.entity.Categoria;
+import com.biblioteca.exception.ResourceNotFoundException;
 import com.biblioteca.repository.CategoriaRepository;
 
 @Service
@@ -14,44 +17,66 @@ public class CategoriaService {
     @Autowired
     private CategoriaRepository categoriaRepository;
 
-    // LISTAR TODAS AS CATEGORIAS
-    public Iterable<Categoria> listarCategorias() {
+    // LISTAR TODAS
+    public List<CategoriaResponseDTO> listarCategorias() {
 
-        return categoriaRepository.findAll();
+        return categoriaRepository.findAll()
+                .stream()
+                .map(this::toResponse)
+                .toList();
     }
 
-    // BUSCAR CATEGORIA POR ID
-    public Optional<Categoria> buscarPorId(Long id) {
+    // BUSCAR POR ID
+    public CategoriaResponseDTO buscarPorId(Long id) {
 
-        return categoriaRepository.findById(id);
+        Categoria categoria = categoriaRepository.findById(id)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Categoria não encontrada"));
+
+        return toResponse(categoria);
     }
 
-    // CADASTRAR CATEGORIA
-    public Categoria cadastrarCategoria(Categoria categoria) {
+    // CADASTRAR
+    public CategoriaResponseDTO cadastrarCategoria(CategoriaRequestDTO dto) {
 
-        return categoriaRepository.save(categoria);
+        Categoria categoria = new Categoria();
+        categoria.setNomeCategoria(dto.nomeCategoria());
+
+        Categoria salvo = categoriaRepository.save(categoria);
+
+        return toResponse(salvo);
     }
 
-    // ATUALIZAR CATEGORIA
-    public Categoria atualizarCategoria(Long id, Categoria categoriaAtualizada) {
+    // ATUALIZAR
+    public CategoriaResponseDTO atualizarCategoria(Long id, CategoriaRequestDTO dto) {
 
-        Optional<Categoria> categoriaExistente = categoriaRepository.findById(id);
+        Categoria categoria = categoriaRepository.findById(id)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Categoria não encontrada"));
 
-        if (categoriaExistente.isPresent()) {
+        categoria.setNomeCategoria(dto.nomeCategoria());
 
-            Categoria categoria = categoriaExistente.get();
+        Categoria atualizado = categoriaRepository.save(categoria);
 
-            categoria.setNomeCategoria(categoriaAtualizada.getNomeCategoria());
-
-            return categoriaRepository.save(categoria);
-        }
-
-        return null;
+        return toResponse(atualizado);
     }
 
-    // DELETAR CATEGORIA
+    // DELETAR
     public void deletarCategoria(Long id) {
 
+        if (!categoriaRepository.existsById(id)) {
+            throw new ResourceNotFoundException("Categoria não encontrada");
+        }
+
         categoriaRepository.deleteById(id);
+    }
+
+    // CONVERSÃO
+    private CategoriaResponseDTO toResponse(Categoria categoria) {
+
+        return new CategoriaResponseDTO(
+                categoria.getIdCategoria(),
+                categoria.getNomeCategoria()
+        );
     }
 }

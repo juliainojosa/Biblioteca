@@ -1,8 +1,9 @@
 package com.biblioteca.controller;
 
-import java.util.Optional;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,8 +14,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.biblioteca.entity.Autor;
+import com.biblioteca.dto.AutorRequestDTO;
+import com.biblioteca.dto.AutorResponseDTO;
 import com.biblioteca.service.AutorService;
+
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/autores")
@@ -25,61 +29,48 @@ public class AutorController {
 
     // LISTAR TODOS OS AUTORES
     @GetMapping
-    public Iterable<Autor> listarAutores() {
+    public List<AutorResponseDTO> listarAutores() {
 
         return autorService.listarAutores();
     }
 
     // BUSCAR AUTOR POR ID
     @GetMapping("/{id}")
-    public ResponseEntity<Autor> buscarPorId(@PathVariable Long id) {
+    public ResponseEntity<AutorResponseDTO> buscarPorId(
+            @PathVariable Long id) {
 
-        Optional<Autor> autor = autorService.buscarPorId(id);
-
-        if (autor.isPresent()) {
-
-            return ResponseEntity.ok(autor.get());
-        }
-
-        return ResponseEntity.notFound().build();
+        return ResponseEntity.ok(autorService.buscarPorId(id));
     }
 
     // CADASTRAR AUTOR
     @PostMapping
-    public Autor cadastrarAutor(@RequestBody Autor autor) {
+    public ResponseEntity<AutorResponseDTO> cadastrarAutor(
+            @Valid @RequestBody AutorRequestDTO dto) {
 
-        return autorService.cadastrarAutor(autor);
+        AutorResponseDTO autor = autorService.cadastrarAutor(dto);
+
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(autor);
     }
 
     // ATUALIZAR AUTOR
     @PutMapping("/{id}")
-    public ResponseEntity<Autor> atualizarAutor(
+    public ResponseEntity<AutorResponseDTO> atualizarAutor(
             @PathVariable Long id,
-            @RequestBody Autor autorAtualizado) {
+            @Valid @RequestBody AutorRequestDTO dto) {
 
-        Autor autor = autorService.atualizarAutor(id, autorAtualizado);
+        AutorResponseDTO autor = autorService.atualizarAutor(id, dto);
 
-        if (autor != null) {
-
-            return ResponseEntity.ok(autor);
-        }
-
-        return ResponseEntity.notFound().build();
+        return ResponseEntity.ok(autor);
     }
 
     // DELETAR AUTOR
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletarAutor(@PathVariable Long id) {
 
-        Optional<Autor> autor = autorService.buscarPorId(id);
+        autorService.deletarAutor(id);
 
-        if (autor.isPresent()) {
-
-            autorService.deletarAutor(id);
-
-            return ResponseEntity.noContent().build();
-        }
-
-        return ResponseEntity.notFound().build();
+        return ResponseEntity.noContent().build();
     }
 }

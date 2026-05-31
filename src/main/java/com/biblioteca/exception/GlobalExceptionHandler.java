@@ -1,28 +1,58 @@
 package com.biblioteca.exception;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    // TRATAR ERROS GENÉRICOS
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<String> tratarErroGenerico(Exception ex) {
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<Map<String, String>> tratarRecursoNaoEncontrado(
+            ResourceNotFoundException ex) {
+
+        Map<String, String> erro = new HashMap<>();
+
+        erro.put("mensagem", ex.getMessage());
 
         return ResponseEntity
-                .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body("Erro interno: " + ex.getMessage());
+                .status(HttpStatus.NOT_FOUND)
+                .body(erro);
     }
 
-    // TRATAR IllegalArgumentException
-    @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<String> tratarIllegalArgument(IllegalArgumentException ex) {
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<Map<String, String>> tratarValidacoes(
+            MethodArgumentNotValidException ex) {
+
+        Map<String, String> erros = new HashMap<>();
+
+        ex.getBindingResult()
+                .getFieldErrors()
+                .forEach(erro ->
+                        erros.put(
+                                erro.getField(),
+                                erro.getDefaultMessage()));
 
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
-                .body("Erro: " + ex.getMessage());
+                .body(erros);
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<Map<String, String>> tratarErroGenerico(
+            Exception ex) {
+
+        Map<String, String> erro = new HashMap<>();
+
+        erro.put("mensagem", ex.getMessage());
+
+        return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(erro);
     }
 }

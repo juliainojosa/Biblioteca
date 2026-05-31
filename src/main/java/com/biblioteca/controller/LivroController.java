@@ -3,13 +3,8 @@ package com.biblioteca.controller;
 // Importa List
 import java.util.List;
 
-// Faz injeção automática de dependência
 import org.springframework.beans.factory.annotation.Autowired;
-
-// Classe usada para retornar respostas HTTP
 import org.springframework.http.ResponseEntity;
-
-// Importações das anotações REST
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -20,10 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-// Importa entidade Livro
 import com.biblioteca.entity.Livro;
-
-// Importa o service
 import com.biblioteca.service.LivroService;
 
 @RestController
@@ -42,7 +34,6 @@ public class LivroController {
     // =====================================================
     // LISTAR TODOS OS LIVROS
     // =====================================================
-
     @GetMapping
     // GET http://localhost:8080/livros
     public List<Livro> listarLivros() {
@@ -54,14 +45,12 @@ public class LivroController {
     // =====================================================
     // BUSCAR LIVRO POR ID
     // =====================================================
-
     @GetMapping("/{id}")
     // Exemplo:
     // GET http://localhost:8080/livros/1
     public ResponseEntity<Livro> buscarPorId(@PathVariable Long id) {
 
         // @PathVariable pega o ID da URL
-
         Livro livro = livroService.buscarPorId(id);
 
         // Retorna 200 OK
@@ -71,34 +60,31 @@ public class LivroController {
     // =====================================================
     // CADASTRAR LIVRO
     // =====================================================
-
     @PostMapping
-    // POST http://localhost:8080/livros
-    public Livro cadastrarLivro(@RequestBody Livro livro) {
+    public ResponseEntity<Livro> cadastrarLivro(
+            @RequestBody Livro livro) {
 
-        // @RequestBody pega o JSON enviado
+        Livro livroSalvo = livroService.cadastrarLivro(livro);
 
-        return livroService.cadastrarLivro(livro);
+        return ResponseEntity.status(201)
+                .body(livroSalvo);
     }
 
     // =====================================================
     // BUSCAR LIVRO POR TÍTULO
     // =====================================================
-
     @GetMapping("/buscar")
     // Exemplo:
     // GET /livros/buscar?titulo=Java
     public List<Livro> buscarPorTitulo(@RequestParam String titulo) {
 
         // @RequestParam pega parâmetro da URL
-
         return livroService.buscarPorTitulo(titulo);
     }
 
     // =====================================================
     // ATUALIZAR LIVRO
     // =====================================================
-
     @PutMapping("/{id}")
     // PUT http://localhost:8080/livros/1
     public ResponseEntity<Livro> atualizarLivro(
@@ -113,7 +99,6 @@ public class LivroController {
     // =====================================================
     // DELETAR LIVRO
     // =====================================================
-
     @DeleteMapping("/{id}")
     // DELETE http://localhost:8080/livros/1
     public ResponseEntity<Void> deletarLivro(@PathVariable Long id) {

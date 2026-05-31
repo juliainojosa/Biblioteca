@@ -1,11 +1,10 @@
 package com.biblioteca.service;
 
-import java.util.Optional;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.biblioteca.entity.Emprestimo;
+import com.biblioteca.exception.ResourceNotFoundException;
 import com.biblioteca.repository.EmprestimoRepository;
 
 @Service
@@ -21,13 +20,17 @@ public class EmprestimoService {
     }
 
     // BUSCAR EMPRÉSTIMO POR ID
-    public Optional<Emprestimo> buscarPorId(Long id) {
+    public Emprestimo buscarPorId(Long id) {
 
-        return emprestimoRepository.findById(id);
+        return emprestimoRepository.findById(id)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Empréstimo não encontrado"));
     }
 
     // CADASTRAR EMPRÉSTIMO
-    public Emprestimo cadastrarEmprestimo(Emprestimo emprestimo) {
+    public Emprestimo cadastrarEmprestimo(
+            Emprestimo emprestimo) {
 
         return emprestimoRepository.save(emprestimo);
     }
@@ -37,38 +40,31 @@ public class EmprestimoService {
             Long id,
             Emprestimo emprestimoAtualizado) {
 
-        Optional<Emprestimo> emprestimoExistente =
-                emprestimoRepository.findById(id);
+        Emprestimo emprestimo = buscarPorId(id);
 
-        if (emprestimoExistente.isPresent()) {
+        emprestimo.setDataEmprestimo(
+                emprestimoAtualizado.getDataEmprestimo());
 
-            Emprestimo emprestimo = emprestimoExistente.get();
+        emprestimo.setDataDevolucao(
+                emprestimoAtualizado.getDataDevolucao());
 
-            // Atualiza os dados
-            emprestimo.setDataEmprestimo(
-                    emprestimoAtualizado.getDataEmprestimo());
+        emprestimo.setDevolvido(
+                emprestimoAtualizado.isDevolvido());
 
-            emprestimo.setDataDevolucao(
-                    emprestimoAtualizado.getDataDevolucao());
+        emprestimo.setLivro(
+                emprestimoAtualizado.getLivro());
 
-            emprestimo.setDevolvido(
-                    emprestimoAtualizado.isDevolvido());
+        emprestimo.setUsuario(
+                emprestimoAtualizado.getUsuario());
 
-            emprestimo.setLivro(
-                    emprestimoAtualizado.getLivro());
-
-            emprestimo.setUsuario(
-                    emprestimoAtualizado.getUsuario());
-
-            return emprestimoRepository.save(emprestimo);
-        }
-
-        return null;
+        return emprestimoRepository.save(emprestimo);
     }
 
     // DELETAR EMPRÉSTIMO
     public void deletarEmprestimo(Long id) {
 
-        emprestimoRepository.deleteById(id);
+        Emprestimo emprestimo = buscarPorId(id);
+
+        emprestimoRepository.delete(emprestimo);
     }
 }

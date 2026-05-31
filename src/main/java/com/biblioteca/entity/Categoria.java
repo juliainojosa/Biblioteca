@@ -1,9 +1,5 @@
 package com.biblioteca.entity;
 
-/*
- * Importações do JPA.
- * JPA = tecnologia usada para mapear objetos Java em tabelas do banco.
- */
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -14,15 +10,16 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
+import jakarta.validation.constraints.NotBlank;
 
 @Entity
 public class Categoria {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-
     private Long idCategoria;
 
+    @NotBlank(message = "Nome da categoria é obrigatório")
     @Column(nullable = false, unique = true)
     private String nomeCategoria;
 
@@ -47,10 +44,10 @@ public class Categoria {
     }
 
     public List<Livro> getLivros() {
-    return livros;
-}
+        return livros;
+    }
 
-public void setLivros(List<Livro> livros) {
-    this.livros = livros;
-}
+    public void setLivros(List<Livro> livros) {
+        this.livros = livros;
+    }
 }

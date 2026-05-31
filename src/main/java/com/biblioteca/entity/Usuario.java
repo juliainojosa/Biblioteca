@@ -1,9 +1,5 @@
 package com.biblioteca.entity;
 
-/*
- * Importações do JPA.
- * JPA = tecnologia usada para mapear objetos Java em tabelas do banco.
- */
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -14,31 +10,35 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 
-@Entity 
+@Entity
 public class Usuario {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-
     private Long idUsuario;
 
+    @NotBlank(message = "Nome do usuário é obrigatório")
     @Column(nullable = false, length = 100)
     private String nomeUsuario;
 
+    @NotBlank(message = "Email é obrigatório")
+    @Email(message = "Email inválido")
     @Column(nullable = false, unique = true)
     private String email;
-    
+
     @Column(length = 20)
     private String telefone;
-    
+
     @OneToMany(mappedBy = "usuario")
     @JsonIgnore
-private List<Emprestimo> emprestimos;
+    private List<Emprestimo> emprestimos;
 
     public Long getIdUsuario() {
         return idUsuario;
-    }   
+    }
 
     public void setIdUsuario(Long idUsuario) {
         this.idUsuario = idUsuario;
@@ -48,8 +48,8 @@ private List<Emprestimo> emprestimos;
         return nomeUsuario;
     }
 
-    public void setNomeUsuario(String nomeUsusario) {
-        this.nomeUsuario = nomeUsusario;
+    public void setNomeUsuario(String nomeUsuario) {
+        this.nomeUsuario = nomeUsuario;
     }
 
     public String getEmail() {
@@ -68,12 +68,11 @@ private List<Emprestimo> emprestimos;
         this.telefone = telefone;
     }
 
-   public List<Emprestimo> getEmprestimos() {
-    return emprestimos;
-}
+    public List<Emprestimo> getEmprestimos() {
+        return emprestimos;
+    }
 
-public void setEmprestimos(List<Emprestimo> emprestimos) {
-    this.emprestimos = emprestimos;
+    public void setEmprestimos(List<Emprestimo> emprestimos) {
+        this.emprestimos = emprestimos;
+    }
 }
-}
-    
