@@ -1,24 +1,11 @@
 package com.biblioteca.controller;
 
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import com.biblioteca.dto.CategoriaRequestDTO;
-import com.biblioteca.dto.CategoriaResponseDTO;
+import com.biblioteca.entity.Categoria;
 import com.biblioteca.service.CategoriaService;
-
-import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/categorias")
@@ -28,38 +15,48 @@ public class CategoriaController {
     private CategoriaService categoriaService;
 
     @GetMapping
-    public List<CategoriaResponseDTO> listarCategorias() {
+    public Iterable<Categoria> listarCategorias() {
+
         return categoriaService.listarCategorias();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<CategoriaResponseDTO> buscarPorId(@PathVariable Long id) {
-        return ResponseEntity.ok(categoriaService.buscarPorId(id));
+    public ResponseEntity<Categoria> buscarPorId(
+            @PathVariable Long id) {
+
+        Categoria categoria =
+                categoriaService.buscarPorId(id);
+
+        return ResponseEntity.ok(categoria);
     }
 
     @PostMapping
-    public ResponseEntity<CategoriaResponseDTO> cadastrarCategoria(
-            @Valid @RequestBody CategoriaRequestDTO dto) {
+    public ResponseEntity<Categoria> cadastrarCategoria(
+            @RequestBody Categoria categoria) {
 
-        CategoriaResponseDTO categoria = categoriaService.cadastrarCategoria(dto);
+        Categoria categoriaSalva =
+                categoriaService.cadastrarCategoria(categoria);
 
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(categoria);
+        return ResponseEntity.status(201)
+                .body(categoriaSalva);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<CategoriaResponseDTO> atualizarCategoria(
+    public ResponseEntity<Categoria> atualizarCategoria(
             @PathVariable Long id,
-            @Valid @RequestBody CategoriaRequestDTO dto) {
+            @RequestBody Categoria categoriaAtualizada) {
 
-        return ResponseEntity.ok(
-                categoriaService.atualizarCategoria(id, dto)
-        );
+        Categoria categoria =
+                categoriaService.atualizarCategoria(
+                        id,
+                        categoriaAtualizada);
+
+        return ResponseEntity.ok(categoria);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletarCategoria(@PathVariable Long id) {
+    public ResponseEntity<Void> deletarCategoria(
+            @PathVariable Long id) {
 
         categoriaService.deletarCategoria(id);
 

@@ -1,12 +1,8 @@
 package com.biblioteca.service;
 
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.biblioteca.dto.CategoriaRequestDTO;
-import com.biblioteca.dto.CategoriaResponseDTO;
 import com.biblioteca.entity.Categoria;
 import com.biblioteca.exception.ResourceNotFoundException;
 import com.biblioteca.repository.CategoriaRepository;
@@ -18,65 +14,51 @@ public class CategoriaService {
     private CategoriaRepository categoriaRepository;
 
     // LISTAR TODAS
-    public List<CategoriaResponseDTO> listarCategorias() {
+    public Iterable<Categoria> listarCategorias() {
 
-        return categoriaRepository.findAll()
-                .stream()
-                .map(this::toResponse)
-                .toList();
+        return categoriaRepository.findAll();
     }
 
     // BUSCAR POR ID
-    public CategoriaResponseDTO buscarPorId(Long id) {
+    public Categoria buscarPorId(Long id) {
 
-        Categoria categoria = categoriaRepository.findById(id)
+        return categoriaRepository.findById(id)
                 .orElseThrow(() ->
-                        new ResourceNotFoundException("Categoria não encontrada"));
-
-        return toResponse(categoria);
+                        new ResourceNotFoundException(
+                                "Categoria não encontrada"));
     }
 
     // CADASTRAR
-    public CategoriaResponseDTO cadastrarCategoria(CategoriaRequestDTO dto) {
+    public Categoria cadastrarCategoria(
+            Categoria categoria) {
 
-        Categoria categoria = new Categoria();
-        categoria.setNomeCategoria(dto.nomeCategoria());
-
-        Categoria salvo = categoriaRepository.save(categoria);
-
-        return toResponse(salvo);
+        return categoriaRepository.save(categoria);
     }
 
     // ATUALIZAR
-    public CategoriaResponseDTO atualizarCategoria(Long id, CategoriaRequestDTO dto) {
+    public Categoria atualizarCategoria(
+            Long id,
+            Categoria categoriaAtualizada) {
 
         Categoria categoria = categoriaRepository.findById(id)
                 .orElseThrow(() ->
-                        new ResourceNotFoundException("Categoria não encontrada"));
+                        new ResourceNotFoundException(
+                                "Categoria não encontrada"));
 
-        categoria.setNomeCategoria(dto.nomeCategoria());
+        categoria.setNomeCategoria(
+                categoriaAtualizada.getNomeCategoria());
 
-        Categoria atualizado = categoriaRepository.save(categoria);
-
-        return toResponse(atualizado);
+        return categoriaRepository.save(categoria);
     }
 
     // DELETAR
     public void deletarCategoria(Long id) {
 
         if (!categoriaRepository.existsById(id)) {
-            throw new ResourceNotFoundException("Categoria não encontrada");
+            throw new ResourceNotFoundException(
+                    "Categoria não encontrada");
         }
 
         categoriaRepository.deleteById(id);
-    }
-
-    // CONVERSÃO
-    private CategoriaResponseDTO toResponse(Categoria categoria) {
-
-        return new CategoriaResponseDTO(
-                categoria.getIdCategoria(),
-                categoria.getNomeCategoria()
-        );
     }
 }

@@ -1,12 +1,8 @@
 package com.biblioteca.service;
 
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.biblioteca.dto.UsuarioRequestDTO;
-import com.biblioteca.dto.UsuarioResponseDTO;
 import com.biblioteca.entity.Usuario;
 import com.biblioteca.exception.ResourceNotFoundException;
 import com.biblioteca.repository.UsuarioRepository;
@@ -18,60 +14,56 @@ public class UsuarioService {
     private UsuarioRepository usuarioRepository;
 
     // LISTAR
-    public List<UsuarioResponseDTO> listarUsuarios() {
-        return usuarioRepository.findAll()
-                .stream()
-                .map(this::toDTO)
-                .toList();
+    public Iterable<Usuario> listarUsuarios() {
+
+        return usuarioRepository.findAll();
     }
 
     // BUSCAR
-    public UsuarioResponseDTO buscarPorId(Long id) {
-        Usuario usuario = usuarioRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado"));
+    public Usuario buscarPorId(Long id) {
 
-        return toDTO(usuario);
+        return usuarioRepository.findById(id)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Usuário não encontrado"));
     }
 
     // CADASTRAR
-    public UsuarioResponseDTO cadastrarUsuario(UsuarioRequestDTO dto) {
+    public Usuario cadastrarUsuario(Usuario usuario) {
 
-        Usuario usuario = new Usuario();
-        usuario.setNomeUsuario(dto.nomeUsuario());
-        usuario.setEmail(dto.email());
-        usuario.setTelefone(dto.telefone());
-
-        return toDTO(usuarioRepository.save(usuario));
+        return usuarioRepository.save(usuario);
     }
 
     // ATUALIZAR
-    public UsuarioResponseDTO atualizarUsuario(Long id, UsuarioRequestDTO dto) {
+    public Usuario atualizarUsuario(
+            Long id,
+            Usuario usuarioAtualizado) {
 
         Usuario usuario = usuarioRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado"));
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Usuário não encontrado"));
 
-        usuario.setNomeUsuario(dto.nomeUsuario());
-        usuario.setEmail(dto.email());
-        usuario.setTelefone(dto.telefone());
+        usuario.setNomeUsuario(
+                usuarioAtualizado.getNomeUsuario());
 
-        return toDTO(usuarioRepository.save(usuario));
+        usuario.setEmail(
+                usuarioAtualizado.getEmail());
+
+        usuario.setTelefone(
+                usuarioAtualizado.getTelefone());
+
+        return usuarioRepository.save(usuario);
     }
 
     // DELETAR
     public void deletarUsuario(Long id) {
+
         Usuario usuario = usuarioRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado"));
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Usuário não encontrado"));
 
         usuarioRepository.delete(usuario);
-    }
-
-    // MAPPER
-    private UsuarioResponseDTO toDTO(Usuario u) {
-        return new UsuarioResponseDTO(
-                u.getIdUsuario(),
-                u.getNomeUsuario(),
-                u.getEmail(),
-                u.getTelefone()
-        );
     }
 }

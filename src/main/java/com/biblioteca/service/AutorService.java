@@ -1,13 +1,8 @@
 package com.biblioteca.service;
 
-import java.util.List;
-import java.util.stream.StreamSupport;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.biblioteca.dto.AutorRequestDTO;
-import com.biblioteca.dto.AutorResponseDTO;
 import com.biblioteca.entity.Autor;
 import com.biblioteca.exception.ResourceNotFoundException;
 import com.biblioteca.repository.AutorRepository;
@@ -19,67 +14,53 @@ public class AutorService {
     private AutorRepository autorRepository;
 
     // LISTAR TODOS
-    public List<AutorResponseDTO> listarAutores() {
+    public Iterable<Autor> listarAutores() {
 
-        return autorRepository.findAll().stream()
-                .map(this::converterParaResponseDTO)
-                .toList();
+        return autorRepository.findAll();
     }
 
     // BUSCAR POR ID
-    public AutorResponseDTO buscarPorId(Long id) {
+    public Autor buscarPorId(Long id) {
 
-        Autor autor = autorRepository.findById(id)
+        return autorRepository.findById(id)
                 .orElseThrow(() ->
-                        new ResourceNotFoundException("Autor não encontrado"));
-
-        return converterParaResponseDTO(autor);
+                        new ResourceNotFoundException(
+                                "Autor não encontrado"));
     }
 
     // CADASTRAR
-    public AutorResponseDTO cadastrarAutor(AutorRequestDTO dto) {
+    public Autor cadastrarAutor(Autor autor) {
 
-        Autor autor = new Autor();
-
-        autor.setNomeAutor(dto.nomeAutor());
-        autor.setNacionalidade(dto.nacionalidade());
-
-        Autor salvo = autorRepository.save(autor);
-
-        return converterParaResponseDTO(salvo);
+        return autorRepository.save(autor);
     }
 
     // ATUALIZAR
-    public AutorResponseDTO atualizarAutor(Long id, AutorRequestDTO dto) {
+    public Autor atualizarAutor(
+            Long id,
+            Autor autorAtualizado) {
 
         Autor autor = autorRepository.findById(id)
                 .orElseThrow(() ->
-                        new ResourceNotFoundException("Autor não encontrado"));
+                        new ResourceNotFoundException(
+                                "Autor não encontrado"));
 
-        autor.setNomeAutor(dto.nomeAutor());
-        autor.setNacionalidade(dto.nacionalidade());
+        autor.setNomeAutor(
+                autorAtualizado.getNomeAutor());
 
-        Autor atualizado = autorRepository.save(autor);
+        autor.setNacionalidade(
+                autorAtualizado.getNacionalidade());
 
-        return converterParaResponseDTO(atualizado);
+        return autorRepository.save(autor);
     }
 
     // DELETAR
     public void deletarAutor(Long id) {
 
         if (!autorRepository.existsById(id)) {
-            throw new ResourceNotFoundException("Autor não encontrado");
+            throw new ResourceNotFoundException(
+                    "Autor não encontrado");
         }
 
         autorRepository.deleteById(id);
-    }
-
-    private AutorResponseDTO converterParaResponseDTO(Autor autor) {
-
-        return new AutorResponseDTO(
-                autor.getIdAutor(),
-                autor.getNomeAutor(),
-                autor.getNacionalidade()
-        );
     }
 }
